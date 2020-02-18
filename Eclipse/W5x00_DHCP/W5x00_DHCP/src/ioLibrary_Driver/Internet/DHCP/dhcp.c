@@ -737,6 +737,7 @@ uint8_t DHCP_run(void)
 
 		case STATE_DHCP_LEASED :
 		   ret = DHCP_IP_LEASED;
+		
 			if ((dhcp_lease_time != INFINITE_LEASETIME) && ((dhcp_lease_time/2) < dhcp_tick_1s)) {
 				
 #ifdef _DHCP_DEBUG_
@@ -911,7 +912,12 @@ void DHCP_init(uint8_t s, uint8_t * buf)
 	DHCP_SOCKET = s; // SOCK_DHCP
 	pDHCPMSG = (RIP_MSG*)buf;
 	DHCP_XID = 0x12345678;
-
+	{
+		DHCP_XID += DHCP_CHADDR[3];
+		DHCP_XID += DHCP_CHADDR[4];
+		DHCP_XID += DHCP_CHADDR[5];
+		DHCP_XID += (DHCP_CHADDR[3] ^ DHCP_CHADDR[4] ^ DHCP_CHADDR[5]);
+	}
 	// WIZchip Netinfo Clear
 	setSIPR(zeroip);
 	setSUBR(zeroip);

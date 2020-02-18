@@ -82,14 +82,12 @@ int main(void)
     //print_network_information();
 	DHCP_init(0, ethBuf0);
 
-	while(1){
-		if(process_dhcp() ==DHCP_IP_LEASED){
-			printf("DHCP Success\r\n");
-			break;
-		}
-		else
-			printf("Try.....\r\n");
+	if(process_dhcp() ==DHCP_IP_LEASED)	printf("DHCP Success\r\n");
+	while(1)
+	{
+		DHCP_run();
 	}
+		
 
 	while(1);
 

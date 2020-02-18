@@ -56,6 +56,7 @@ extern "C" {
  * @note    If defined, it depends on <stdio.h>
  */
 //#define _DHCP_DEBUG_
+//#define _DHCP_DEBUG_DEEP_
 
 
 /* Retry to processing DHCP */

@@ -716,7 +716,8 @@ uint8_t DHCP_run(void)
 
 	ret = DHCP_RUNNING;
 	type = parseDHCPMSG();
-
+	if(type == DHCP_OFFER)
+		dhcp_state = STATE_DHCP_DISCOVER;
 	switch ( dhcp_state ) {
 	   case STATE_DHCP_INIT     :
          DHCP_allocated_ip[0] = 0;
@@ -948,6 +949,13 @@ void DHCP_init(uint8_t s, uint8_t * buf)
 	DHCP_SOCKET = s; // SOCK_DHCP
 	pDHCPMSG = (RIP_MSG*)buf;
 	DHCP_XID = 0x12345678;
+
+	{
+		DHCP_XID += DHCP_CHADDR[3];
+		DHCP_XID += DHCP_CHADDR[4];
+		DHCP_XID += DHCP_CHADDR[5];
+		DHCP_XID += (DHCP_CHADDR[3] ^ DHCP_CHADDR[4] ^ DHCP_CHADDR[5]);
+	}
 
 	// WIZchip Netinfo Clear
 	setSIPR(zeroip);

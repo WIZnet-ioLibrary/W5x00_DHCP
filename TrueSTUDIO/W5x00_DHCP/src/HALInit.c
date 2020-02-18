@@ -2,6 +2,7 @@
 
 #include "HALInit.h"
 #include "misc.h"
+#include "Internet\DHCP\dhcp.h"
 #include "stm32f10x_rcc.h"
 #include "stm32f10x_fsmc.h"
 #include "stm32f10x_gpio.h"
@@ -13,6 +14,8 @@
 
 
 volatile unsigned long globalTimer = 0;
+static uint32_t mill_cnt = 0;
+static uint32_t sec_cnt = 0;
 
 void HardFault_Handler(void)
 {
@@ -63,14 +66,16 @@ void timerInitialize(void)
         RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2,ENABLE);
 
         TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
-        TIM_TimeBaseInitStruct.TIM_Period = 8400-1;
-        TIM_TimeBaseInitStruct.TIM_Prescaler = 1000-1;
+
+        TIM_TimeBaseInitStruct.TIM_Period = 14-1;
+        TIM_TimeBaseInitStruct.TIM_Prescaler = 7200;
+
         TIM_TimeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1;
         TIM_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
         TIM_TimeBaseInitStruct.TIM_RepetitionCounter = 0;
         TIM_TimeBaseInit(TIM2,&TIM_TimeBaseInitStruct);
         TIM_ITConfig(TIM2,TIM_IT_Update,ENABLE);
-        TIM_SetAutoreload(TIM2,8400-1);
+      //  TIM_SetAutoreload(TIM2,8400-1);
         TIM_Cmd(TIM2,ENABLE);
 
         NVIC_InitTypeDef   NVIC_InitStructure;
@@ -80,20 +85,30 @@ void timerInitialize(void)
         NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
         NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
         NVIC_Init(&NVIC_InitStructure);
-
-//		SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK);
-//		SysTick_Config(72000);
-//		NVIC_InitStructure.NVIC_IRQChannel = SysTick_IRQn;
-//		NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0; // Highest priority
-//		NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-//		NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//		NVIC_Init(&NVIC_InitStructure);
 }
 
-
 void TIM2_IRQHandler(void){
-        TIM_ClearITPendingBit(TIM2,TIM_IT_Update);
+
+	uint32_t count = 0;
+
+	if(TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)
+	{
+		TIM_ClearFlag(TIM2, TIM_FLAG_Update);
+		TIM_ClearITPendingBit(TIM2, TIM_IT_Update); // Clear the interrupt flag
+
+        mill_cnt++;
         globalTimer++;
+	}
+
+	 if((mill_cnt % 1000) == 0) {
+            mill_cnt = 0;
+            sec_cnt++;
+            DHCP_time_handler();
+	 }
+	 if((sec_cnt % 60) == 0) {
+                sec_cnt = 0;
+	 }
+
 }
 
 
@@ -159,11 +174,6 @@ void gpioInitialize(void)
 	GPIO_InitStructure.GPIO_Pin = W5x00_RESET_PIN;
 	GPIO_Init(W5x00_RESET_PORT, &GPIO_InitStructure);
 
-	/* Button For SNTP */
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_InitStructure.GPIO_Pin	= USER0_PIN;
-	
-	GPIO_Init(USER0_PORT,&GPIO_InitStructure);
 }
 
 void usartInitialize(void)
