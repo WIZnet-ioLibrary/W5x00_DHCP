@@ -603,7 +603,7 @@ int8_t parseDHCPMSG(void)
    #endif   
    }
    else return 0;
-	if (svr_port == DHCP_SERVER_PORT) {
+	if(svr_port == DHCP_SERVER_PORT) {
       // compare mac address
 		if ( (pDHCPMSG->chaddr[0] != DHCP_CHADDR[0]) || (pDHCPMSG->chaddr[1] != DHCP_CHADDR[1]) ||
 		     (pDHCPMSG->chaddr[2] != DHCP_CHADDR[2]) || (pDHCPMSG->chaddr[3] != DHCP_CHADDR[3]) ||
@@ -775,7 +775,7 @@ uint8_t DHCP_run(void)
 
 		case STATE_DHCP_LEASED :
 		   ret = DHCP_IP_LEASED;
-			if ((dhcp_lease_time != INFINITE_LEASETIME) && ((dhcp_lease_time/2) < dhcp_tick_1s)) {
+		    if ((dhcp_lease_time != INFINITE_LEASETIME) && ((dhcp_lease_time/2) < dhcp_tick_1s)) {
 				
 #ifdef _DHCP_DEBUG_
  				printf("> Maintains the IP address \r\n");
@@ -1021,8 +1021,6 @@ char NibbleToHex(uint8_t nibble)
   nibble &= 0x0F;
   if (nibble <= 9)
     return nibble + '0';
-  else 
+  else
     return nibble + ('A'-0x0A);
 }
-
-
