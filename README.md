@@ -1,4 +1,4 @@
-# W5x00_DMA_with_W5100S_EVB
+# W5x00_DHCP
 This Project is base on W5100S-EVB. but If you use the SPI of Arduino interface on W5100S-EVB, you can use the W5100S/W5100/W5200/W5500 when wizchip_conf.h modify
 
 # Example Environment
